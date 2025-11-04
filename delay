@@ -1,0 +1,38 @@
+--!strict
+
+task.wait() 
+repeat task.wait() until game:IsLoaded()
+wait(5)
+
+local Lighting = game:GetService("Lighting")
+local DELAY_TIME = 10
+
+local function applyLightingSettings()
+    for i,v in pairs(Lighting:GetChildren()) do
+    if v:IsA("Sky") or v:IsA("BlurEffect") or v:IsA("BloomEffect") or v:IsA("SunRaysEffect") then
+    v:Destroy()
+    end
+    end
+    
+    Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+    Lighting.Brightness = 1
+    Lighting.ClockTime = 14
+    Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+    Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+    Lighting.ExposureCompensation = 0
+    Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+    Lighting.FogEnd = 999999999
+    Lighting.GeographicLatitude = 41.733
+    Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+    Lighting.GlobalShadows = true
+end
+
+Lighting.DescendantAdded:Connect(function(obj)
+if obj:IsA("Sky") or obj:IsA("BlurEffect") or obj:IsA("BloomEffect") or obj:IsA("SunRaysEffect") then
+obj:Destroy()
+end
+end)
+
+while task.wait(DELAY_TIME) do
+    applyLightingSettings()
+end
