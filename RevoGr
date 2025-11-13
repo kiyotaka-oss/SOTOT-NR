@@ -1,0 +1,26 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local itemToPull = "Revolver Garpit"
+
+local function pullItem()
+    local itemSource = game:GetService("StarterPack"):FindFirstChild(itemToPull)
+    
+    if not itemSource then
+        itemSource = game:GetService("ReplicatedStorage"):FindFirstChild(itemToPull)
+    end
+    
+    if itemSource and itemSource:IsA("Tool") then
+        local backpack = player:FindFirstChild("Backpack")
+        
+        local existingItem = backpack:FindFirstChild(itemToPull) or player.Character:FindFirstChild(itemToPull)
+        
+        if not existingItem then
+            local newItem = itemSource:Clone()
+            newItem.Parent = backpack
+        end
+    end
+end
+
+player.CharacterAdded:Connect(pullItem)
+
+pullItem()
