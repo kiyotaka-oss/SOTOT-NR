@@ -1,0 +1,114 @@
+--!strict
+task.wait() 
+repeat task.wait() until game:IsLoaded()
+wait(5) -- Tunggu beberapa saat agar semua asset game termuat
+
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local player = Players.LocalPlayer
+
+-- KONFIGURASI MODIFIKASI
+local FAST_FIRE_RATE_VALUE = 0.5 -- Nilai ShotCooldown (0.01 untuk tembak secepat mungkin)
+local NO_RECOIL_VALUE = 0           -- Nilai Recoil (Nol)
+
+local CONFIG_FOLDER_NAME = "Configuration" 
+local COOLDOWN_VALUE_NAME = "ShotCooldown"
+local RECOIL_MAX_NAME = "RecoilMax"       
+local RECOIL_MIN_NAME = "RecoilMin"       
+local RECOIL_DECAY_NAME = "RecoilDecay"   
+local TOTAL_RECOIL_MAX_NAME = "TotalRecoilMax" -- Variabel tambahan yang mungkin Anda lihat
+
+-- [1] FUNGSI UTAMA: APLIKASI MODIFIKASI
+local function applyGodMode(tool)
+    if not tool or not tool:IsA("Tool") then return false end
+    
+    local configFolder = tool:FindFirstChild(CONFIG_FOLDER_NAME)
+    if not configFolder then 
+        task.wait(0.1) 
+        configFolder = tool:FindFirstChild(CONFIG_FOLDER_NAME)
+        if not configFolder then return false end
+    end
+
+    local isSuccess = false
+
+    -- 1. MODIFIKASI FIRE RATE (ShotCooldown)
+    local cooldownValue = configFolder:FindFirstChild(COOLDOWN_VALUE_NAME)
+    if cooldownValue and (cooldownValue:IsA("NumberValue") or cooldownValue:IsA("IntValue")) then
+        cooldownValue.Value = FAST_FIRE_RATE_VALUE 
+        isSuccess = true
+    end
+
+    -- 2. MODIFIKASI RECOIL (Komprehensif)
+    local valuesToZero = {
+        configFolder:FindFirstChild(RECOIL_MAX_NAME),
+        configFolder:FindFirstChild(RECOIL_MIN_NAME),
+        configFolder:FindFirstChild(RECOIL_DECAY_NAME),
+        configFolder:FindFirstChild(TOTAL_RECOIL_MAX_NAME)
+    }
+    
+    for _, valueObject in ipairs(valuesToZero) do
+        if valueObject and (valueObject:IsA("NumberValue") or valueObject:IsA("IntValue")) then
+            valueObject.Value = NO_RECOIL_VALUE -- Set semua nilai recoil ke 0
+            isSuccess = true
+        end
+    end
+    
+    return isSuccess
+end
+
+-- [2] FUNGSI HANDLE: MENGURUS SETIAP SENJATA BARU
+local function handleToolAdded(tool)
+    task.wait(0.1) 
+    
+    local success = applyGodMode(tool)
+    
+    if success then
+        StarterGui:SetCore("SendNotification", {
+            Title = "MODIFIKASI AKTIF",
+            Text = "Senjata '"..tool.Name.."' - Fire Rate Max & No Recoil Penuh.",
+            Duration = 3 
+        })
+    end
+end
+
+-- --- LISTENER ANTI-RESET ---
+
+-- FIX RESET SAAT RESPAWN
+player.CharacterAdded:Connect(function(char)
+    task.wait(0.5) -- Tunggu sebentar agar Backpack terisi ulang
+    
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        -- Terapkan ke semua senjata di Backpack
+        for _, item in ipairs(backpack:GetChildren()) do
+            if item:IsA("Tool") then
+                handleToolAdded(item)
+            end
+        end
+    end
+end)
+
+-- FIX SAAT MENGAMBIL SENJATA BARU
+local backpack = player:FindFirstChild("Backpack")
+if backpack then
+    -- Listener untuk setiap item baru yang ditambahkan ke Backpack
+    backpack.ChildAdded:Connect(function(child)
+        if child:IsA("Tool") then
+            handleToolAdded(child)
+        end
+    end)
+    
+    -- Terapkan ke semua senjata yang sudah ada saat ini (saat join pertama)
+    for _, item in ipairs(backpack:GetChildren()) do
+        if item:IsA("Tool") then
+            handleToolAdded(item)
+        end
+    end
+end
+
+-- Notifikasi Awal
+StarterGui:SetCore("SendNotification", {
+    Title = "No Recoil By GRIZZ",
+    Text = "Fast Fire Rate dan No Recoil Done.",
+    Duration = 5 
+})
