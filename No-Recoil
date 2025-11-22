@@ -7,7 +7,7 @@ local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 
-local FAST_FIRE_RATE_VALUE = 0.4 
+local FAST_FIRE_RATE_VALUE = 0.2 
 local NO_RECOIL_VALUE = 0           
 
 local CONFIG_FOLDER_NAME = "Configuration" 
@@ -60,8 +60,8 @@ local function handleToolAdded(tool)
     if success then
         StarterGui:SetCore("SendNotification", {
             Title = "MODIFIKASI AKTIF",
-            Text = "Senjata '"..tool.Name.."' - Fire Rate Max & No Recoil Penuh.",
-            Duration = 3 
+            Text = "No Recoil Done.",
+            Duration = 2 
         })
     end
 end
